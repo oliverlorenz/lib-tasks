@@ -1,0 +1,17 @@
+import { mock } from 'jest-mock-extended';
+import type { TaskStorage } from '../task-storage';
+import type { Task } from './task.types';
+
+export const mockTaskStorage = mock<TaskStorage>();
+
+export const mockTask: Task = {
+  id: 'task-1',
+  title: 'Mock Task',
+  status: 'todo',
+  priority: 1,
+  tags: [],
+  assignees: [],
+  scheduleType: 'flexible',
+  createdAt: new Date('2026-01-01T00:00:00.000Z'),
+  updatedAt: new Date('2026-01-01T00:00:00.000Z'),
+};
