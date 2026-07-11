@@ -25,7 +25,28 @@ describe('TaskService', () => {
       expect(created.createdAt).toBeInstanceOf(Date);
       expect(created.updatedAt).toBeInstanceOf(Date);
       expect(created.dependencies).toEqual([]);
+      expect(created.important).toBe(false);
+      expect(created.urgent).toBe(false);
       expect(mockTaskStorage.create).toHaveBeenCalledWith(created);
+    });
+
+    test('keeps explicitly provided important/urgent', async () => {
+      mockTaskStorage.create.mockImplementation((task) => Promise.resolve(task));
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      const created = await service.createTask({
+        title: 'Ship the release',
+        status: 'todo',
+        priority: 1,
+        important: true,
+        urgent: true,
+        tags: [],
+        assignees: [],
+        scheduleType: 'flexible',
+      });
+
+      expect(created.important).toBe(true);
+      expect(created.urgent).toBe(true);
     });
 
     test('keeps explicitly provided dependencies', async () => {

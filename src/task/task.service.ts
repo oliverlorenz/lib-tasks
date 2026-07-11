@@ -1,8 +1,13 @@
 import type { TaskQuery, TaskStorage } from '../task-storage';
 import type { Task, TaskId } from './task.types';
 
-export type CreateTaskInput = Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'dependencies'> & {
+export type CreateTaskInput = Omit<
+  Task,
+  'id' | 'createdAt' | 'updatedAt' | 'dependencies' | 'important' | 'urgent'
+> & {
   dependencies?: Task['dependencies'];
+  important?: Task['important'];
+  urgent?: Task['urgent'];
 };
 
 export class TaskService {
@@ -18,6 +23,8 @@ export class TaskService {
     const task: Task = {
       ...input,
       dependencies: input.dependencies ?? [],
+      important: input.important ?? false,
+      urgent: input.urgent ?? false,
       id: crypto.randomUUID(),
       createdAt: now,
       updatedAt: now,

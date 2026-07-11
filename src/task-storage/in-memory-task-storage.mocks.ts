@@ -5,6 +5,8 @@ export const mockTask: Task = {
   title: 'Mock Task',
   status: 'todo',
   priority: 1,
+  important: false,
+  urgent: false,
   tags: [],
   assignees: [],
   dependencies: [],

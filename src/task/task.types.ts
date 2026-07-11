@@ -24,6 +24,8 @@ export type Task = {
 
   status: TaskStatus;
   priority: TaskPriority;
+  important: boolean;
+  urgent: boolean;
 
   tags: string[];
   assignees: string[];
