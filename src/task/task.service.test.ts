@@ -139,4 +139,22 @@ describe('TaskService', () => {
       expect(mockTaskStorage.list).toHaveBeenCalledWith({ tag: 'urgent' });
     });
   });
+
+  describe('listSubtasks', () => {
+    test('returns an empty array for a task without children', async () => {
+      mockTaskStorage.list.mockResolvedValue([]);
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      await expect(service.listSubtasks(mockTask.id)).resolves.toEqual([]);
+      expect(mockTaskStorage.list).toHaveBeenCalledWith({ parentId: mockTask.id });
+    });
+
+    test('returns all direct children', async () => {
+      const child = { ...mockTask, id: 'task-2', parentId: mockTask.id };
+      mockTaskStorage.list.mockResolvedValue([child]);
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      await expect(service.listSubtasks(mockTask.id)).resolves.toEqual([child]);
+    });
+  });
 });

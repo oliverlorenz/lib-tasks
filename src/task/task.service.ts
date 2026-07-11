@@ -59,4 +59,8 @@ export class TaskService {
   public async listTasks(query?: TaskQuery): Promise<Task[]> {
     return this.storage.list(query);
   }
+
+  public async listSubtasks(parentId: TaskId): Promise<Task[]> {
+    return this.listTasks({ parentId });
+  }
 }
