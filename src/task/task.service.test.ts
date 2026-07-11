@@ -207,6 +207,48 @@ describe('TaskService', () => {
       expect(created.durationDays).toBe(2);
     });
 
+    test('defaults links to [] but keeps explicitly provided valid links', async () => {
+      mockTaskStorage.create.mockImplementation((task) => Promise.resolve(task));
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      const defaulted = await service.createTask({
+        title: 'x',
+        status: 'todo',
+        priority: 1,
+        tags: [],
+        assignees: [],
+        scheduleType: 'flexible',
+      });
+      const withLinks = await service.createTask({
+        title: 'x',
+        status: 'todo',
+        priority: 1,
+        tags: [],
+        assignees: [],
+        scheduleType: 'flexible',
+        links: [{ url: 'https://example.com/ticket/1', label: 'Ticket' }],
+      });
+
+      expect(defaulted.links).toEqual([]);
+      expect(withLinks.links).toEqual([{ url: 'https://example.com/ticket/1', label: 'Ticket' }]);
+    });
+
+    test('rejects an invalid link url', async () => {
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      await expect(
+        service.createTask({
+          title: 'x',
+          status: 'todo',
+          priority: 1,
+          tags: [],
+          assignees: [],
+          scheduleType: 'flexible',
+          links: [{ url: 'not-a-url' }],
+        }),
+      ).rejects.toThrow(/url/i);
+    });
+
     test('rejects a non-positive setupDurationInMinutes', async () => {
       const service = TaskService.createInstance(mockTaskStorage);
 
@@ -312,6 +354,14 @@ describe('TaskService', () => {
       await expect(service.updateTask(mockTask.id, { durationDays: -1 })).rejects.toThrow(
         /durationDays/i,
       );
+    });
+
+    test('rejects an invalid link url in the patch', async () => {
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      await expect(
+        service.updateTask(mockTask.id, { links: [{ url: 'not-a-url' }] }),
+      ).rejects.toThrow(/url/i);
     });
 
     test('rejects a non-positive setupDurationInMinutes in the patch', async () => {

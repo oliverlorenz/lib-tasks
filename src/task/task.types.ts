@@ -17,6 +17,11 @@ export type TaskDependency = {
   lagDays?: number;
 };
 
+export type TaskLink = {
+  url: string;
+  label?: string;
+};
+
 export type Task = {
   id: TaskId;
   title: string;
@@ -33,6 +38,7 @@ export type Task = {
 
   parentId?: TaskId;
   dependencies: TaskDependency[];
+  links: TaskLink[];
 
   scheduleType: TaskScheduleType;
   startDate?: Date;

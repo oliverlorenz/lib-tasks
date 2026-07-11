@@ -11,12 +11,14 @@ export type CreateTaskInput = Omit<
   | 'urgent'
   | 'progress'
   | 'postponeCount'
+  | 'links'
 > & {
   dependencies?: Task['dependencies'];
   important?: Task['important'];
   urgent?: Task['urgent'];
   progress?: Task['progress'];
   postponeCount?: Task['postponeCount'];
+  links?: Task['links'];
 };
 
 export class TaskService {
@@ -39,6 +41,8 @@ export class TaskService {
     if (input.startDate !== undefined && input.deadline !== undefined) {
       this.assertValidDateRange(input.startDate, input.deadline);
     }
+    const links = input.links ?? [];
+    links.forEach((link) => this.assertValidLink(link));
 
     const now = new Date();
     const task: Task = {
@@ -48,6 +52,7 @@ export class TaskService {
       urgent: input.urgent ?? false,
       progress,
       postponeCount: input.postponeCount ?? 0,
+      links,
       id: crypto.randomUUID(),
       createdAt: now,
       updatedAt: now,
@@ -82,6 +87,9 @@ export class TaskService {
     }
     if (patch.startDate !== undefined && patch.deadline !== undefined) {
       this.assertValidDateRange(patch.startDate, patch.deadline);
+    }
+    if (patch.links !== undefined) {
+      patch.links.forEach((link) => this.assertValidLink(link));
     }
     return this.storage.update(id, { ...patch, updatedAt: new Date() });
   }
@@ -165,6 +173,14 @@ export class TaskService {
     await walkForward(taskId);
 
     return chain;
+  }
+
+  private assertValidLink(link: Task['links'][number]): void {
+    try {
+      new URL(link.url);
+    } catch {
+      throw new Error(`Invalid link url "${link.url}": must be a valid URL`);
+    }
   }
 
   private assertValidPriority(priority: Task['priority']): void {
