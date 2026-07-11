@@ -104,6 +104,32 @@ describe('InMemoryTaskStorage', () => {
       expect(results.map((task) => task.id)).toEqual(['task-1']);
     });
 
+    test('combines tag and assignee filters with AND semantics', async () => {
+      const storage = InMemoryTaskStorage.createInstance();
+      await storage.create({
+        ...mockTask,
+        id: 'task-1',
+        tags: ['urgent'],
+        assignees: ['alice'],
+      });
+      await storage.create({
+        ...mockTask,
+        id: 'task-2',
+        tags: ['urgent'],
+        assignees: ['bob'],
+      });
+      await storage.create({
+        ...mockTask,
+        id: 'task-3',
+        tags: ['later'],
+        assignees: ['alice'],
+      });
+
+      const results = await storage.list({ tag: 'urgent', assignee: 'alice' });
+
+      expect(results.map((task) => task.id)).toEqual(['task-1']);
+    });
+
     test('filters by parentId and returns only direct children, not grandchildren', async () => {
       const storage = InMemoryTaskStorage.createInstance();
       await storage.create({ ...mockTask, id: 'a' });
