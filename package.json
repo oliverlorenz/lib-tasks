@@ -1,5 +1,5 @@
 {
-  "name": "@oliverlorenz/<REPO_NAME>",
+  "name": "@oliverlorenz/lib-tasks",
   "version": "1.0.0",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
@@ -39,16 +39,21 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/oliverlorenz/<REPO_NAME>.git"
+    "url": "git+https://github.com/oliverlorenz/lib-tasks.git"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "tasks",
+    "task-management",
+    "gantt",
+    "eisenhower"
+  ],
+  "author": "Oliver Lorenz",
+  "license": "MIT",
   "bugs": {
-    "url": "https://github.com/oliverlorenz/<REPO_NAME>/issues"
+    "url": "https://github.com/oliverlorenz/lib-tasks/issues"
   },
-  "homepage": "https://github.com/oliverlorenz/<REPO_NAME>#readme",
-  "description": "",
+  "homepage": "https://github.com/oliverlorenz/lib-tasks#readme",
+  "description": "Framework-agnostic task management library with pluggable storage backends.",
   "engines": {
     "node": ">=22.0.0"
   },
