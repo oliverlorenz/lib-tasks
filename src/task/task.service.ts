@@ -31,7 +31,10 @@ export class TaskService {
     this.assertValidPriority(input.priority);
     this.assertValidProgress(progress);
     if (input.durationDays !== undefined) {
-      this.assertValidDurationDays(input.durationDays);
+      this.assertPositiveNumber('durationDays', input.durationDays);
+    }
+    if (input.setupDurationInMinutes !== undefined) {
+      this.assertPositiveNumber('setupDurationInMinutes', input.setupDurationInMinutes);
     }
     if (input.startDate !== undefined && input.deadline !== undefined) {
       this.assertValidDateRange(input.startDate, input.deadline);
@@ -72,7 +75,10 @@ export class TaskService {
       this.assertValidProgress(patch.progress);
     }
     if (patch.durationDays !== undefined) {
-      this.assertValidDurationDays(patch.durationDays);
+      this.assertPositiveNumber('durationDays', patch.durationDays);
+    }
+    if (patch.setupDurationInMinutes !== undefined) {
+      this.assertPositiveNumber('setupDurationInMinutes', patch.setupDurationInMinutes);
     }
     if (patch.startDate !== undefined && patch.deadline !== undefined) {
       this.assertValidDateRange(patch.startDate, patch.deadline);
@@ -175,9 +181,9 @@ export class TaskService {
     }
   }
 
-  private assertValidDurationDays(durationDays: NonNullable<Task['durationDays']>): void {
-    if (durationDays <= 0) {
-      throw new Error(`Invalid durationDays "${durationDays}": must be positive`);
+  private assertPositiveNumber(fieldName: string, value: number): void {
+    if (value <= 0) {
+      throw new Error(`Invalid ${fieldName} "${value}": must be positive`);
     }
   }
 
