@@ -3,11 +3,12 @@ import type { Task, TaskId } from './task.types';
 
 export type CreateTaskInput = Omit<
   Task,
-  'id' | 'createdAt' | 'updatedAt' | 'dependencies' | 'important' | 'urgent'
+  'id' | 'createdAt' | 'updatedAt' | 'dependencies' | 'important' | 'urgent' | 'progress'
 > & {
   dependencies?: Task['dependencies'];
   important?: Task['important'];
   urgent?: Task['urgent'];
+  progress?: Task['progress'];
 };
 
 export class TaskService {
@@ -18,13 +19,23 @@ export class TaskService {
   constructor(private readonly storage: TaskStorage) {}
 
   public async createTask(input: CreateTaskInput): Promise<Task> {
+    const progress = input.progress ?? 0;
     this.assertValidPriority(input.priority);
+    this.assertValidProgress(progress);
+    if (input.durationDays !== undefined) {
+      this.assertValidDurationDays(input.durationDays);
+    }
+    if (input.startDate !== undefined && input.deadline !== undefined) {
+      this.assertValidDateRange(input.startDate, input.deadline);
+    }
+
     const now = new Date();
     const task: Task = {
       ...input,
       dependencies: input.dependencies ?? [],
       important: input.important ?? false,
       urgent: input.urgent ?? false,
+      progress,
       id: crypto.randomUUID(),
       createdAt: now,
       updatedAt: now,
@@ -47,6 +58,15 @@ export class TaskService {
   public async updateTask(id: TaskId, patch: Partial<Task>): Promise<Task | undefined> {
     if (patch.priority !== undefined) {
       this.assertValidPriority(patch.priority);
+    }
+    if (patch.progress !== undefined) {
+      this.assertValidProgress(patch.progress);
+    }
+    if (patch.durationDays !== undefined) {
+      this.assertValidDurationDays(patch.durationDays);
+    }
+    if (patch.startDate !== undefined && patch.deadline !== undefined) {
+      this.assertValidDateRange(patch.startDate, patch.deadline);
     }
     return this.storage.update(id, { ...patch, updatedAt: new Date() });
   }
@@ -128,6 +148,26 @@ export class TaskService {
     if (!Number.isInteger(priority) || priority < 1) {
       throw new Error(
         `Invalid priority "${priority}": must be a positive integer (1 = highest priority)`,
+      );
+    }
+  }
+
+  private assertValidProgress(progress: Task['progress']): void {
+    if (progress < 0 || progress > 100) {
+      throw new Error(`Invalid progress "${progress}": must be between 0 and 100`);
+    }
+  }
+
+  private assertValidDurationDays(durationDays: NonNullable<Task['durationDays']>): void {
+    if (durationDays <= 0) {
+      throw new Error(`Invalid durationDays "${durationDays}": must be positive`);
+    }
+  }
+
+  private assertValidDateRange(startDate: Date, deadline: Date): void {
+    if (deadline < startDate) {
+      throw new Error(
+        `Invalid deadline "${deadline.toISOString()}": must not be before startDate "${startDate.toISOString()}"`,
       );
     }
   }

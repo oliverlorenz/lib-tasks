@@ -48,3 +48,9 @@ consumers can compute inline:
 | true | false | Schedule |
 | false | true | Delegate |
 | false | false | Eliminate |
+
+### Scheduling & Gantt fields
+
+`startDate`, `deadline`, `durationDays`, and `progress` (0-100, defaults to `0`) provide the data
+a Gantt renderer needs. `createTask`/`updateTask` validate that `progress` stays within 0-100,
+`durationDays` is positive, and `deadline` is not before `startDate` when both are set.

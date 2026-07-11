@@ -96,6 +96,90 @@ describe('TaskService', () => {
         }),
       ).rejects.toThrow(/priority/i);
     });
+
+    test('defaults progress to 0', async () => {
+      mockTaskStorage.create.mockImplementation((task) => Promise.resolve(task));
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      const created = await service.createTask({
+        title: 'x',
+        status: 'todo',
+        priority: 1,
+        tags: [],
+        assignees: [],
+        scheduleType: 'flexible',
+      });
+
+      expect(created.progress).toBe(0);
+    });
+
+    test('rejects a deadline before startDate', async () => {
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      await expect(
+        service.createTask({
+          title: 'x',
+          status: 'todo',
+          priority: 1,
+          tags: [],
+          assignees: [],
+          scheduleType: 'flexible',
+          startDate: new Date('2026-08-01'),
+          deadline: new Date('2026-07-01'),
+        }),
+      ).rejects.toThrow(/deadline/i);
+    });
+
+    test('rejects progress outside 0-100', async () => {
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      await expect(
+        service.createTask({
+          title: 'x',
+          status: 'todo',
+          priority: 1,
+          tags: [],
+          assignees: [],
+          scheduleType: 'flexible',
+          progress: 150,
+        }),
+      ).rejects.toThrow(/progress/i);
+    });
+
+    test('rejects a non-positive durationDays', async () => {
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      await expect(
+        service.createTask({
+          title: 'x',
+          status: 'todo',
+          priority: 1,
+          tags: [],
+          assignees: [],
+          scheduleType: 'flexible',
+          durationDays: 0,
+        }),
+      ).rejects.toThrow(/durationDays/i);
+    });
+
+    test('accepts a valid durationDays and a startDate before deadline', async () => {
+      mockTaskStorage.create.mockImplementation((task) => Promise.resolve(task));
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      const created = await service.createTask({
+        title: 'x',
+        status: 'todo',
+        priority: 1,
+        tags: [],
+        assignees: [],
+        scheduleType: 'flexible',
+        durationDays: 2,
+        startDate: new Date('2026-07-01'),
+        deadline: new Date('2026-08-01'),
+      });
+
+      expect(created.durationDays).toBe(2);
+    });
   });
 
   describe('getTaskById', () => {
@@ -155,6 +239,31 @@ describe('TaskService', () => {
       const service = TaskService.createInstance(mockTaskStorage);
 
       await expect(service.updateTask(mockTask.id, { priority: -1 })).rejects.toThrow(/priority/i);
+    });
+
+    test('rejects an invalid progress in the patch', async () => {
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      await expect(service.updateTask(mockTask.id, { progress: -5 })).rejects.toThrow(/progress/i);
+    });
+
+    test('rejects a non-positive durationDays in the patch', async () => {
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      await expect(service.updateTask(mockTask.id, { durationDays: -1 })).rejects.toThrow(
+        /durationDays/i,
+      );
+    });
+
+    test('rejects a deadline before startDate in the patch', async () => {
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      await expect(
+        service.updateTask(mockTask.id, {
+          startDate: new Date('2026-08-01'),
+          deadline: new Date('2026-07-01'),
+        }),
+      ).rejects.toThrow(/deadline/i);
     });
   });
 
