@@ -104,6 +104,17 @@ describe('InMemoryTaskStorage', () => {
       expect(results.map((task) => task.id)).toEqual(['task-1']);
     });
 
+    test('filters by parentId and returns only direct children, not grandchildren', async () => {
+      const storage = InMemoryTaskStorage.createInstance();
+      await storage.create({ ...mockTask, id: 'a' });
+      await storage.create({ ...mockTask, id: 'b', parentId: 'a' });
+      await storage.create({ ...mockTask, id: 'c', parentId: 'b' });
+
+      const results = await storage.list({ parentId: 'a' });
+
+      expect(results.map((task) => task.id)).toEqual(['b']);
+    });
+
     test('returns independent copies that do not leak mutations back into storage', async () => {
       const storage = InMemoryTaskStorage.createInstance();
       await storage.create(mockTask);

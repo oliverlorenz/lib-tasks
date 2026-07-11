@@ -47,6 +47,10 @@ export class InMemoryTaskStorage implements TaskStorage {
       const tag = query.tag;
       results = results.filter((task) => task.tags.includes(tag));
     }
+    if (query?.parentId !== undefined) {
+      const parentId = query.parentId;
+      results = results.filter((task) => task.parentId === parentId);
+    }
 
     return Promise.resolve(results.map((task) => structuredClone(task)));
   }

@@ -19,6 +19,8 @@ export type Task = {
   tags: string[];
   assignees: string[];
 
+  parentId?: TaskId;
+
   scheduleType: TaskScheduleType;
 
   createdAt: Date;

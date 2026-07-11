@@ -4,6 +4,7 @@ export type TaskQuery = {
   status?: TaskStatus[];
   assignee?: string;
   tag?: string;
+  parentId?: TaskId;
 };
 
 export interface TaskStorage {
