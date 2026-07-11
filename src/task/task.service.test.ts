@@ -45,6 +45,36 @@ describe('TaskService', () => {
 
       expect(created.dependencies).toEqual(dependencies);
     });
+
+    test('rejects a non-integer priority', async () => {
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      await expect(
+        service.createTask({
+          title: 'x',
+          status: 'todo',
+          priority: 1.5,
+          tags: [],
+          assignees: [],
+          scheduleType: 'flexible',
+        }),
+      ).rejects.toThrow(/priority/i);
+    });
+
+    test('rejects a priority below 1', async () => {
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      await expect(
+        service.createTask({
+          title: 'x',
+          status: 'todo',
+          priority: 0,
+          tags: [],
+          assignees: [],
+          scheduleType: 'flexible',
+        }),
+      ).rejects.toThrow(/priority/i);
+    });
   });
 
   describe('getTaskById', () => {
@@ -98,6 +128,12 @@ describe('TaskService', () => {
       const service = TaskService.createInstance(mockTaskStorage);
 
       await expect(service.updateTask('unknown', { title: 'x' })).resolves.toBeUndefined();
+    });
+
+    test('rejects an invalid priority in the patch', async () => {
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      await expect(service.updateTask(mockTask.id, { priority: -1 })).rejects.toThrow(/priority/i);
     });
   });
 

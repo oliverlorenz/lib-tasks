@@ -31,3 +31,7 @@ const task = await taskService.createTask({
 
 const found = await taskService.getTaskByIdOrFail(task.id);
 ```
+
+`priority` is an integer: `1` is the highest priority, ascending numbers are lower priority. It is
+open-ended (not limited to a fixed 1-4 scale) so consumers can use coarse or fine-grained scales
+alike.
