@@ -3,7 +3,6 @@
   "ignoreDependencies": [
     "conventional-changelog-conventionalcommits",
     "eslint-config-prettier",
-    "jest-mock-extended",
     "type-fest"
   ],
   "rules": {

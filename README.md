@@ -15,5 +15,19 @@ npm install @oliverlorenz/lib-tasks
 ## Usage
 
 ```typescript
-import {} from '@oliverlorenz/lib-tasks';
+import { InMemoryTaskStorage, TaskService } from '@oliverlorenz/lib-tasks';
+
+const storage = InMemoryTaskStorage.createInstance();
+const taskService = TaskService.createInstance(storage);
+
+const task = await taskService.createTask({
+  title: 'Wash laundry',
+  status: 'todo',
+  priority: 1,
+  tags: ['chores'],
+  assignees: ['alice'],
+  scheduleType: 'flexible',
+});
+
+const found = await taskService.getTaskByIdOrFail(task.id);
 ```
