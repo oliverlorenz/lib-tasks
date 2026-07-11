@@ -26,6 +26,7 @@ export type Task = {
   priority: TaskPriority;
   important: boolean;
   urgent: boolean;
+  postponeCount: number;
 
   tags: string[];
   assignees: string[];

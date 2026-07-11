@@ -3,12 +3,20 @@ import type { Task, TaskId } from './task.types';
 
 export type CreateTaskInput = Omit<
   Task,
-  'id' | 'createdAt' | 'updatedAt' | 'dependencies' | 'important' | 'urgent' | 'progress'
+  | 'id'
+  | 'createdAt'
+  | 'updatedAt'
+  | 'dependencies'
+  | 'important'
+  | 'urgent'
+  | 'progress'
+  | 'postponeCount'
 > & {
   dependencies?: Task['dependencies'];
   important?: Task['important'];
   urgent?: Task['urgent'];
   progress?: Task['progress'];
+  postponeCount?: Task['postponeCount'];
 };
 
 export class TaskService {
@@ -36,6 +44,7 @@ export class TaskService {
       important: input.important ?? false,
       urgent: input.urgent ?? false,
       progress,
+      postponeCount: input.postponeCount ?? 0,
       id: crypto.randomUUID(),
       createdAt: now,
       updatedAt: now,
@@ -106,6 +115,14 @@ export class TaskService {
   public async completeTaskOrFail(id: TaskId): Promise<Task> {
     await this.assertPredecessorsDone(id);
     return this.updateTaskOrFail(id, { status: 'done', completedAt: new Date() });
+  }
+
+  public async postponeTaskOrFail(id: TaskId, newDeadline?: Date): Promise<Task> {
+    const task = await this.getTaskByIdOrFail(id);
+    return this.updateTaskOrFail(id, {
+      postponeCount: task.postponeCount + 1,
+      ...(newDeadline !== undefined ? { deadline: newDeadline } : {}),
+    });
   }
 
   public async resolveChain(taskId: TaskId): Promise<Task[]> {

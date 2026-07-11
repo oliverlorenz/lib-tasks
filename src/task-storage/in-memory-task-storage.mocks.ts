@@ -7,6 +7,7 @@ export const mockTask: Task = {
   priority: 1,
   important: false,
   urgent: false,
+  postponeCount: 0,
   tags: [],
   assignees: [],
   dependencies: [],
