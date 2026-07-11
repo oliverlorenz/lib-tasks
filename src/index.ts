@@ -4,6 +4,8 @@ export type {
   TaskStatus,
   TaskPriority,
   TaskScheduleType,
+  TaskDependency,
+  TaskDependencyType,
   CreateTaskInput,
 } from './task';
 export { TaskService } from './task';

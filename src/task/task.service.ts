@@ -1,7 +1,9 @@
 import type { TaskQuery, TaskStorage } from '../task-storage';
 import type { Task, TaskId } from './task.types';
 
-export type CreateTaskInput = Omit<Task, 'id' | 'createdAt' | 'updatedAt'>;
+export type CreateTaskInput = Omit<Task, 'id' | 'createdAt' | 'updatedAt' | 'dependencies'> & {
+  dependencies?: Task['dependencies'];
+};
 
 export class TaskService {
   public static createInstance(storage: TaskStorage): TaskService {
@@ -14,6 +16,7 @@ export class TaskService {
     const now = new Date();
     const task: Task = {
       ...input,
+      dependencies: input.dependencies ?? [],
       id: crypto.randomUUID(),
       createdAt: now,
       updatedAt: now,
