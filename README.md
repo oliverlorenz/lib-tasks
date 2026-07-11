@@ -130,3 +130,33 @@ const milestone = await milestoneService.createMilestone({
   status: 'open',
 });
 ```
+
+Putting it together — assign tasks to an epic and a milestone, then query them back:
+
+```typescript
+const epic = await epicService.createEpic({ title: 'Q3 roadmap', status: 'open' });
+const milestone = await milestoneService.createMilestone({
+  title: 'Beta release',
+  dueDate: new Date('2026-09-01'),
+  epicId: epic.id,
+  status: 'open',
+});
+
+await taskService.createTask({
+  title: 'Write release notes',
+  status: 'todo',
+  priority: 1,
+  tags: [],
+  assignees: ['alice'],
+  scheduleType: 'flexible',
+  epicId: epic.id,
+  milestoneId: milestone.id,
+});
+
+const tasksInEpic = await taskService.listTasksByEpic(epic.id);
+const tasksInMilestone = await taskService.listTasksByMilestone(milestone.id);
+```
+
+`epicId`/`milestoneId` are plain optional fields on `Task` — `TaskService` does not validate that the
+referenced `Epic`/`Milestone` actually exists (deliberately loose coupling, no cross-domain runtime
+dependency between `TaskService`, `EpicService`, and `MilestoneService`).
