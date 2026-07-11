@@ -103,3 +103,14 @@ predecessors (auto-scheduling) is out of scope for this library.
 `links: TaskLink[]` holds external references (PRs, docs, tickets in other systems), separate from
 `dependencies` (structured task-to-task relations with scheduling semantics). `url` must be a
 valid URL; `createTask`/`updateTask` reject invalid ones. Defaults to `[]`.
+
+### Epics
+
+`Epic` is a coarse grouping over multiple tasks, managed independently of `TaskService`:
+
+```typescript
+import { EpicService, InMemoryEpicStorage } from '@oliverlorenz/lib-tasks';
+
+const epicService = EpicService.createInstance(InMemoryEpicStorage.createInstance());
+const epic = await epicService.createEpic({ title: 'Q3 roadmap', status: 'open' });
+```
