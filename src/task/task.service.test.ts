@@ -206,6 +206,39 @@ describe('TaskService', () => {
 
       expect(created.durationDays).toBe(2);
     });
+
+    test('rejects a non-positive setupDurationInMinutes', async () => {
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      await expect(
+        service.createTask({
+          title: 'x',
+          status: 'todo',
+          priority: 1,
+          tags: [],
+          assignees: [],
+          scheduleType: 'flexible',
+          setupDurationInMinutes: -5,
+        }),
+      ).rejects.toThrow(/setupDurationInMinutes/i);
+    });
+
+    test('accepts a valid setupDurationInMinutes', async () => {
+      mockTaskStorage.create.mockImplementation((task) => Promise.resolve(task));
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      const created = await service.createTask({
+        title: 'x',
+        status: 'todo',
+        priority: 1,
+        tags: [],
+        assignees: [],
+        scheduleType: 'flexible',
+        setupDurationInMinutes: 15,
+      });
+
+      expect(created.setupDurationInMinutes).toBe(15);
+    });
   });
 
   describe('getTaskById', () => {
@@ -279,6 +312,14 @@ describe('TaskService', () => {
       await expect(service.updateTask(mockTask.id, { durationDays: -1 })).rejects.toThrow(
         /durationDays/i,
       );
+    });
+
+    test('rejects a non-positive setupDurationInMinutes in the patch', async () => {
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      await expect(
+        service.updateTask(mockTask.id, { setupDurationInMinutes: -10 }),
+      ).rejects.toThrow(/setupDurationInMinutes/i);
     });
 
     test('rejects a deadline before startDate in the patch', async () => {

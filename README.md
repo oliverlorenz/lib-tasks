@@ -55,6 +55,10 @@ consumers can compute inline:
 a Gantt renderer needs. `createTask`/`updateTask` validate that `progress` stays within 0-100,
 `durationDays` is positive, and `deadline` is not before `startDate` when both are set.
 
+`setupDurationInMinutes` models setup/changeover time needed before a task can start (e.g.
+context switching, preparing tools/material) — kept separate from `durationDays` since it's
+usually much shorter than the task's own runtime. Also validated to be positive when set.
+
 `postponeCount` (defaults to `0`) tracks how often a task has been rescheduled.
 `taskService.postponeTaskOrFail(id, newDeadline?)` increments it and optionally sets a new
 `deadline` in one call.

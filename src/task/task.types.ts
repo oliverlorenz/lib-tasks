@@ -38,6 +38,7 @@ export type Task = {
   startDate?: Date;
   deadline?: Date;
   durationDays?: number;
+  setupDurationInMinutes?: number;
   progress: number;
 
   createdAt: Date;
