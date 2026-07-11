@@ -1,17 +1,19 @@
-# <REPO_NAME>
+# lib-tasks
 
-a description
+Framework-agnostic task management library with pluggable storage backends. Ships with an
+in-memory storage implementation; see [docs/concept.md](docs/concept.md) for the full design and
+roadmap.
 
 ## Installation
 
-To install <REPO_NAME>, use npm:
+To install lib-tasks, use npm:
 
 ```bash
-npm install @oliverlorenz/<REPO_NAME>
+npm install @oliverlorenz/lib-tasks
 ```
 
 ## Usage
 
 ```typescript
-import {} from '@oliverlorenz/<REPO_NAME>';
+import {} from '@oliverlorenz/lib-tasks';
 ```
