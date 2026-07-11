@@ -121,6 +121,16 @@ export class TaskService {
     return this.listTasks({ parentId });
   }
 
+  public async listTasksByEpic(epicId: NonNullable<Task['epicId']>): Promise<Task[]> {
+    return this.listTasks({ epicId });
+  }
+
+  public async listTasksByMilestone(
+    milestoneId: NonNullable<Task['milestoneId']>,
+  ): Promise<Task[]> {
+    return this.listTasks({ milestoneId });
+  }
+
   public async startTaskOrFail(id: TaskId): Promise<Task> {
     await this.assertPredecessorsDone(id);
     return this.updateTaskOrFail(id, { status: 'in_progress' });

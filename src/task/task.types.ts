@@ -1,3 +1,6 @@
+import type { EpicId } from '../epic';
+import type { MilestoneId } from '../milestone';
+
 export type TaskId = string;
 
 export type TaskStatus = 'todo' | 'in_progress' | 'blocked' | 'done' | 'cancelled';
@@ -39,6 +42,9 @@ export type Task = {
   parentId?: TaskId;
   dependencies: TaskDependency[];
   links: TaskLink[];
+
+  epicId?: EpicId;
+  milestoneId?: MilestoneId;
 
   scheduleType: TaskScheduleType;
   startDate?: Date;
