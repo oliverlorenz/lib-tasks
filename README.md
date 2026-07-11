@@ -54,3 +54,7 @@ consumers can compute inline:
 `startDate`, `deadline`, `durationDays`, and `progress` (0-100, defaults to `0`) provide the data
 a Gantt renderer needs. `createTask`/`updateTask` validate that `progress` stays within 0-100,
 `durationDays` is positive, and `deadline` is not before `startDate` when both are set.
+
+`postponeCount` (defaults to `0`) tracks how often a task has been rescheduled.
+`taskService.postponeTaskOrFail(id, newDeadline?)` increments it and optionally sets a new
+`deadline` in one call.

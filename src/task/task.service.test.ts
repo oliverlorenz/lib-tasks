@@ -97,6 +97,32 @@ describe('TaskService', () => {
       ).rejects.toThrow(/priority/i);
     });
 
+    test('defaults postponeCount to 0 but keeps an explicit value', async () => {
+      mockTaskStorage.create.mockImplementation((task) => Promise.resolve(task));
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      const defaulted = await service.createTask({
+        title: 'x',
+        status: 'todo',
+        priority: 1,
+        tags: [],
+        assignees: [],
+        scheduleType: 'flexible',
+      });
+      const explicit = await service.createTask({
+        title: 'x',
+        status: 'todo',
+        priority: 1,
+        tags: [],
+        assignees: [],
+        scheduleType: 'flexible',
+        postponeCount: 3,
+      });
+
+      expect(defaulted.postponeCount).toBe(0);
+      expect(explicit.postponeCount).toBe(3);
+    });
+
     test('defaults progress to 0', async () => {
       mockTaskStorage.create.mockImplementation((task) => Promise.resolve(task));
       const service = TaskService.createInstance(mockTaskStorage);
@@ -402,6 +428,58 @@ describe('TaskService', () => {
       await expect(service.startTaskOrFail('task-a')).resolves.toMatchObject({
         status: 'in_progress',
       });
+    });
+  });
+
+  describe('postponeTaskOrFail', () => {
+    test('increments postponeCount and sets the new deadline', async () => {
+      const task = { ...mockTask, postponeCount: 0 };
+      mockTaskStorage.findById.mockResolvedValue(task);
+      const newDeadline = new Date('2026-09-01');
+      mockTaskStorage.update.mockImplementation((id, patch) =>
+        Promise.resolve({ ...task, ...patch }),
+      );
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      const postponed = await service.postponeTaskOrFail(task.id, newDeadline);
+
+      expect(postponed.postponeCount).toBe(1);
+      expect(postponed.deadline).toEqual(newDeadline);
+    });
+
+    test('increments postponeCount twice across two calls', async () => {
+      let stored = { ...mockTask, postponeCount: 0 };
+      mockTaskStorage.findById.mockImplementation(() => Promise.resolve(stored));
+      mockTaskStorage.update.mockImplementation((id, patch) => {
+        stored = { ...stored, ...patch };
+        return Promise.resolve(stored);
+      });
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      await service.postponeTaskOrFail(mockTask.id, new Date('2026-09-01'));
+      await service.postponeTaskOrFail(mockTask.id, new Date('2026-10-01'));
+
+      expect(stored.postponeCount).toBe(2);
+    });
+
+    test('leaves the deadline untouched when no newDeadline is given', async () => {
+      const task = { ...mockTask, postponeCount: 0, deadline: new Date('2026-07-01') };
+      mockTaskStorage.findById.mockResolvedValue(task);
+      mockTaskStorage.update.mockImplementation((id, patch) =>
+        Promise.resolve({ ...task, ...patch }),
+      );
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      const postponed = await service.postponeTaskOrFail(task.id);
+
+      expect(postponed.deadline).toEqual(task.deadline);
+    });
+
+    test('throws for an unknown id', async () => {
+      mockTaskStorage.findById.mockResolvedValue(undefined);
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      await expect(service.postponeTaskOrFail('unknown')).rejects.toThrow(/unknown/);
     });
   });
 
