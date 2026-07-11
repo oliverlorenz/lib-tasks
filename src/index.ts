@@ -6,6 +6,7 @@ export type {
   TaskScheduleType,
   TaskDependency,
   TaskDependencyType,
+  TaskLink,
   CreateTaskInput,
 } from './task';
 export { TaskService } from './task';

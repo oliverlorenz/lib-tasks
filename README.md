@@ -97,3 +97,9 @@ const bars = toGanttBars(await taskService.listTasks());
 `fixed` tasks (`scheduleType: 'fixed'`) have a binding `startDate`/`deadline` a renderer should not
 move. `flexible` tasks only need `durationDays` plus `dependencies` — deriving their start from
 predecessors (auto-scheduling) is out of scope for this library.
+
+### Links
+
+`links: TaskLink[]` holds external references (PRs, docs, tickets in other systems), separate from
+`dependencies` (structured task-to-task relations with scheduling semantics). `url` must be a
+valid URL; `createTask`/`updateTask` reject invalid ones. Defaults to `[]`.
