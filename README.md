@@ -62,3 +62,38 @@ usually much shorter than the task's own runtime. Also validated to be positive 
 `postponeCount` (defaults to `0`) tracks how often a task has been rescheduled.
 `taskService.postponeTaskOrFail(id, newDeadline?)` increments it and optionally sets a new
 `deadline` in one call.
+
+`lib-tasks` does not render a Gantt chart itself (see [docs/concept.md](docs/concept.md)) — it
+only provides the data. Map `Task[]` into whatever shape your Gantt renderer expects, for example:
+
+```typescript
+type GanttBar = {
+  id: string;
+  label: string;
+  start: Date;
+  end: Date;
+  progress: number;
+  dependencyIds: string[];
+};
+
+function toGanttBars(tasks: Task[]): GanttBar[] {
+  return tasks
+    .filter((task) => task.startDate !== undefined && task.deadline !== undefined)
+    .map((task) => ({
+      id: task.id,
+      label: task.title,
+      start: task.startDate as Date,
+      end: task.deadline as Date,
+      progress: task.progress,
+      dependencyIds: task.dependencies
+        .filter((dependency) => dependency.type === 'finish_to_start')
+        .map((dependency) => dependency.taskId),
+    }));
+}
+
+const bars = toGanttBars(await taskService.listTasks());
+```
+
+`fixed` tasks (`scheduleType: 'fixed'`) have a binding `startDate`/`deadline` a renderer should not
+move. `flexible` tasks only need `durationDays` plus `dependencies` — deriving their start from
+predecessors (auto-scheduling) is out of scope for this library.
