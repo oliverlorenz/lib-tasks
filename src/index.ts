@@ -1,6 +1,7 @@
-// Placeholder entry point for the @oliverlorenz/<REPO_NAME> template.
-// Delete this once real source files exist — it only exists so the build,
-// lint, and test tooling have something to run against.
+export type { Task, TaskId, TaskStatus, TaskPriority, TaskScheduleType } from './task';
+
+// Placeholder, kept until the first runtime domain (TaskService, #9) replaces it — the build,
+// lint, and test tooling need at least one runtime export/test to run against.
 export function placeholder(): string {
   return 'replace-me';
 }
