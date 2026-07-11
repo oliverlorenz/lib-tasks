@@ -57,6 +57,14 @@ export class InMemoryTaskStorage implements TaskStorage {
         task.dependencies.some((dependency) => dependency.taskId === dependsOnTaskId),
       );
     }
+    if (query?.epicId !== undefined) {
+      const epicId = query.epicId;
+      results = results.filter((task) => task.epicId === epicId);
+    }
+    if (query?.milestoneId !== undefined) {
+      const milestoneId = query.milestoneId;
+      results = results.filter((task) => task.milestoneId === milestoneId);
+    }
 
     return Promise.resolve(results.map((task) => structuredClone(task)));
   }

@@ -460,6 +460,28 @@ describe('TaskService', () => {
     });
   });
 
+  describe('listTasksByEpic', () => {
+    test('delegates to listTasks with epicId', async () => {
+      const task = { ...mockTask, epicId: 'epic-1' };
+      mockTaskStorage.list.mockResolvedValue([task]);
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      await expect(service.listTasksByEpic('epic-1')).resolves.toEqual([task]);
+      expect(mockTaskStorage.list).toHaveBeenCalledWith({ epicId: 'epic-1' });
+    });
+  });
+
+  describe('listTasksByMilestone', () => {
+    test('delegates to listTasks with milestoneId', async () => {
+      const task = { ...mockTask, milestoneId: 'milestone-1' };
+      mockTaskStorage.list.mockResolvedValue([task]);
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      await expect(service.listTasksByMilestone('milestone-1')).resolves.toEqual([task]);
+      expect(mockTaskStorage.list).toHaveBeenCalledWith({ milestoneId: 'milestone-1' });
+    });
+  });
+
   describe('startTaskOrFail', () => {
     test('throws naming the blocking predecessor when a finish_to_start dependency is not done', async () => {
       const predecessor = {

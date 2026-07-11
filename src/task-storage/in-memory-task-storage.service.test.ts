@@ -156,6 +156,26 @@ describe('InMemoryTaskStorage', () => {
       expect(results.map((task) => task.id)).toEqual(['aufhaengen']);
     });
 
+    test('filters by epicId', async () => {
+      const storage = InMemoryTaskStorage.createInstance();
+      await storage.create({ ...mockTask, id: 'task-1', epicId: 'epic-1' });
+      await storage.create({ ...mockTask, id: 'task-2', epicId: 'epic-2' });
+
+      const results = await storage.list({ epicId: 'epic-1' });
+
+      expect(results.map((task) => task.id)).toEqual(['task-1']);
+    });
+
+    test('filters by milestoneId', async () => {
+      const storage = InMemoryTaskStorage.createInstance();
+      await storage.create({ ...mockTask, id: 'task-1', milestoneId: 'milestone-1' });
+      await storage.create({ ...mockTask, id: 'task-2', milestoneId: 'milestone-2' });
+
+      const results = await storage.list({ milestoneId: 'milestone-1' });
+
+      expect(results.map((task) => task.id)).toEqual(['task-1']);
+    });
+
     test('returns independent copies that do not leak mutations back into storage', async () => {
       const storage = InMemoryTaskStorage.createInstance();
       await storage.create(mockTask);

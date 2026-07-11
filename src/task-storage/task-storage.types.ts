@@ -1,3 +1,5 @@
+import type { EpicId } from '../epic';
+import type { MilestoneId } from '../milestone';
 import type { Task, TaskId, TaskStatus } from '../task';
 
 export type TaskQuery = {
@@ -6,6 +8,8 @@ export type TaskQuery = {
   tag?: string;
   parentId?: TaskId;
   dependsOnTaskId?: TaskId;
+  epicId?: EpicId;
+  milestoneId?: MilestoneId;
 };
 
 export interface TaskStorage {
