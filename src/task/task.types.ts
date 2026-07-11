@@ -8,6 +8,15 @@ export type TaskPriority = number;
 
 export type TaskScheduleType = 'fixed' | 'flexible';
 
+export type TaskDependencyType =
+  'finish_to_start' | 'start_to_start' | 'finish_to_finish' | 'start_to_finish';
+
+export type TaskDependency = {
+  taskId: TaskId;
+  type: TaskDependencyType;
+  lagDays?: number;
+};
+
 export type Task = {
   id: TaskId;
   title: string;
@@ -20,6 +29,7 @@ export type Task = {
   assignees: string[];
 
   parentId?: TaskId;
+  dependencies: TaskDependency[];
 
   scheduleType: TaskScheduleType;
 

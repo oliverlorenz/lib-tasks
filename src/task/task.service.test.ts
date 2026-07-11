@@ -24,7 +24,26 @@ describe('TaskService', () => {
       expect(created.id).toEqual(expect.any(String));
       expect(created.createdAt).toBeInstanceOf(Date);
       expect(created.updatedAt).toBeInstanceOf(Date);
+      expect(created.dependencies).toEqual([]);
       expect(mockTaskStorage.create).toHaveBeenCalledWith(created);
+    });
+
+    test('keeps explicitly provided dependencies', async () => {
+      mockTaskStorage.create.mockImplementation((task) => Promise.resolve(task));
+      const service = TaskService.createInstance(mockTaskStorage);
+      const dependencies = [{ taskId: 'other-task', type: 'finish_to_start' as const }];
+
+      const created = await service.createTask({
+        title: 'Hang up laundry',
+        status: 'todo',
+        priority: 1,
+        tags: [],
+        assignees: [],
+        scheduleType: 'flexible',
+        dependencies,
+      });
+
+      expect(created.dependencies).toEqual(dependencies);
     });
   });
 
