@@ -114,3 +114,19 @@ import { EpicService, InMemoryEpicStorage } from '@oliverlorenz/lib-tasks';
 const epicService = EpicService.createInstance(InMemoryEpicStorage.createInstance());
 const epic = await epicService.createEpic({ title: 'Q3 roadmap', status: 'open' });
 ```
+
+### Milestones
+
+`Milestone` is a point in time (no duration), optionally linked to an `Epic` via `epicId`,
+managed independently of `TaskService`/`EpicService`:
+
+```typescript
+import { MilestoneService, InMemoryMilestoneStorage } from '@oliverlorenz/lib-tasks';
+
+const milestoneService = MilestoneService.createInstance(InMemoryMilestoneStorage.createInstance());
+const milestone = await milestoneService.createMilestone({
+  title: 'Beta release',
+  dueDate: new Date('2026-09-01'),
+  status: 'open',
+});
+```
