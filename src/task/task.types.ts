@@ -34,6 +34,10 @@ export type Task = {
   dependencies: TaskDependency[];
 
   scheduleType: TaskScheduleType;
+  startDate?: Date;
+  deadline?: Date;
+  durationDays?: number;
+  progress: number;
 
   createdAt: Date;
   updatedAt: Date;
