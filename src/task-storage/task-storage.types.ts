@@ -5,6 +5,7 @@ export type TaskQuery = {
   assignee?: string;
   tag?: string;
   parentId?: TaskId;
+  dependsOnTaskId?: TaskId;
 };
 
 export interface TaskStorage {

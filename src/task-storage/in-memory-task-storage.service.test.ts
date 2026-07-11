@@ -115,6 +115,21 @@ describe('InMemoryTaskStorage', () => {
       expect(results.map((task) => task.id)).toEqual(['b']);
     });
 
+    test('filters by dependsOnTaskId to find direct successors', async () => {
+      const storage = InMemoryTaskStorage.createInstance();
+      await storage.create({ ...mockTask, id: 'waschen' });
+      await storage.create({
+        ...mockTask,
+        id: 'aufhaengen',
+        dependencies: [{ taskId: 'waschen', type: 'finish_to_start' }],
+      });
+      await storage.create({ ...mockTask, id: 'unrelated' });
+
+      const results = await storage.list({ dependsOnTaskId: 'waschen' });
+
+      expect(results.map((task) => task.id)).toEqual(['aufhaengen']);
+    });
+
     test('returns independent copies that do not leak mutations back into storage', async () => {
       const storage = InMemoryTaskStorage.createInstance();
       await storage.create(mockTask);
