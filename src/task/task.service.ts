@@ -13,6 +13,7 @@ export class TaskService {
   constructor(private readonly storage: TaskStorage) {}
 
   public async createTask(input: CreateTaskInput): Promise<Task> {
+    this.assertValidPriority(input.priority);
     const now = new Date();
     const task: Task = {
       ...input,
@@ -37,6 +38,9 @@ export class TaskService {
   }
 
   public async updateTask(id: TaskId, patch: Partial<Task>): Promise<Task | undefined> {
+    if (patch.priority !== undefined) {
+      this.assertValidPriority(patch.priority);
+    }
     return this.storage.update(id, { ...patch, updatedAt: new Date() });
   }
 
@@ -111,6 +115,14 @@ export class TaskService {
     await walkForward(taskId);
 
     return chain;
+  }
+
+  private assertValidPriority(priority: Task['priority']): void {
+    if (!Number.isInteger(priority) || priority < 1) {
+      throw new Error(
+        `Invalid priority "${priority}": must be a positive integer (1 = highest priority)`,
+      );
+    }
   }
 
   private async assertPredecessorsDone(id: TaskId): Promise<void> {
