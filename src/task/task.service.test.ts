@@ -239,6 +239,83 @@ describe('TaskService', () => {
     });
   });
 
+  describe('resolveChain', () => {
+    test('resolves a three-stage chain fully and in order', async () => {
+      const waschen = { ...mockTask, id: 'waschen', dependencies: [] };
+      const aufhaengen = {
+        ...mockTask,
+        id: 'aufhaengen',
+        dependencies: [
+          { taskId: 'waschen', type: 'finish_to_start' as const },
+          { taskId: 'unrelated', type: 'start_to_start' as const },
+        ],
+      };
+      const falten = {
+        ...mockTask,
+        id: 'falten',
+        dependencies: [{ taskId: 'aufhaengen', type: 'finish_to_start' as const }],
+      };
+      const byId = new Map([
+        ['waschen', waschen],
+        ['aufhaengen', aufhaengen],
+        ['falten', falten],
+      ]);
+      mockTaskStorage.findById.mockImplementation((id) => Promise.resolve(byId.get(id)));
+      mockTaskStorage.list.mockImplementation((query) =>
+        Promise.resolve(
+          [...byId.values()].filter((task) =>
+            task.dependencies.some(
+              (dependency) =>
+                dependency.taskId === query?.dependsOnTaskId &&
+                dependency.type === 'finish_to_start',
+            ),
+          ),
+        ),
+      );
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      const chain = await service.resolveChain('aufhaengen');
+
+      expect(chain.map((task) => task.id)).toEqual(['waschen', 'aufhaengen', 'falten']);
+    });
+
+    test('terminates on a circular dependency, each id appears at most once', async () => {
+      const taskA = {
+        ...mockTask,
+        id: 'A',
+        dependencies: [{ taskId: 'B', type: 'finish_to_start' as const }],
+      };
+      const taskB = {
+        ...mockTask,
+        id: 'B',
+        dependencies: [{ taskId: 'A', type: 'finish_to_start' as const }],
+      };
+      const byId = new Map([
+        ['A', taskA],
+        ['B', taskB],
+      ]);
+      mockTaskStorage.findById.mockImplementation((id) => Promise.resolve(byId.get(id)));
+      mockTaskStorage.list.mockImplementation((query) =>
+        Promise.resolve(
+          [...byId.values()].filter((task) =>
+            task.dependencies.some(
+              (dependency) =>
+                dependency.taskId === query?.dependsOnTaskId &&
+                dependency.type === 'finish_to_start',
+            ),
+          ),
+        ),
+      );
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      const chain = await service.resolveChain('A');
+
+      const ids = chain.map((task) => task.id);
+      expect(new Set(ids).size).toBe(ids.length);
+      expect(ids.sort()).toEqual(['A', 'B']);
+    });
+  });
+
   describe('completeTaskOrFail', () => {
     test('throws naming the blocking predecessor when a finish_to_start dependency is not done', async () => {
       const predecessor = {
