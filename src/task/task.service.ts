@@ -77,6 +77,42 @@ export class TaskService {
     return this.updateTaskOrFail(id, { status: 'done', completedAt: new Date() });
   }
 
+  public async resolveChain(taskId: TaskId): Promise<Task[]> {
+    const visited = new Set<TaskId>();
+    const chain: Task[] = [];
+
+    const walkBackward = async (id: TaskId): Promise<void> => {
+      if (visited.has(id)) {
+        return;
+      }
+      visited.add(id);
+      const task = await this.getTaskByIdOrFail(id);
+      for (const dependency of task.dependencies) {
+        if (dependency.type === 'finish_to_start') {
+          await walkBackward(dependency.taskId);
+        }
+      }
+      chain.push(task);
+    };
+
+    const walkForward = async (id: TaskId): Promise<void> => {
+      const successors = await this.listTasks({ dependsOnTaskId: id });
+      for (const successor of successors) {
+        if (visited.has(successor.id)) {
+          continue;
+        }
+        visited.add(successor.id);
+        chain.push(successor);
+        await walkForward(successor.id);
+      }
+    };
+
+    await walkBackward(taskId);
+    await walkForward(taskId);
+
+    return chain;
+  }
+
   private async assertPredecessorsDone(id: TaskId): Promise<void> {
     const task = await this.getTaskByIdOrFail(id);
     for (const dependency of task.dependencies) {
