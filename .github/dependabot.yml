@@ -1,0 +1,55 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    commit-message:
+      prefix: "chore"
+    groups:
+      eslint:
+        patterns:
+          - "eslint*"
+          - "@eslint/*"
+          - "@typescript-eslint/*"
+          - "eslint-config-prettier"
+          - "eslint-plugin-*"
+      jest:
+        patterns:
+          - "jest"
+          - "ts-jest"
+          - "@types/jest"
+          - "jest-mock-extended"
+      typescript:
+        patterns:
+          - "typescript"
+          - "typescript-strict-plugin"
+          - "@types/node"
+      semantic-release:
+        patterns:
+          - "semantic-release"
+          - "@semantic-release/*"
+          - "conventional-changelog-*"
+      dev-tools:
+        patterns:
+          - "husky"
+          - "prettier"
+          - "del-cli"
+          - "globals"
+          - "knip"
+          - "markdownlint-cli2"
+          - "markdown-link-check"
+          - "publint"
+          - "audit-ci"
+          - "@arethetypeswrong/*"
+      production:
+        dependency-type: production
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: "ci"

@@ -1,0 +1,30 @@
+name: Feature Request
+description: Propose a new method, type, or behaviour
+title: "feat: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: summary
+    attributes:
+      label: Summary
+      description: What should be added and why?
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance-criteria
+    attributes:
+      label: Acceptance criteria
+      description: Checkboxes that must all be true before this issue can be closed.
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: api-sketch
+    attributes:
+      label: API sketch (optional)
+      description: Rough TypeScript signature or usage example.
+      render: typescript

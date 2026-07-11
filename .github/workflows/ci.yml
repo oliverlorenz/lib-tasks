@@ -1,0 +1,129 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  changes:
+    name: Detect changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      src: ${{ github.event_name == 'push' && 'true' || steps.filter.outputs.src }}
+      docs: ${{ github.event_name == 'push' && 'true' || steps.filter.outputs.docs }}
+      deps: ${{ github.event_name == 'push' && 'true' || steps.filter.outputs.deps }}
+    steps:
+      - uses: actions/checkout@v6.0.2
+      - uses: dorny/paths-filter@v4
+        id: filter
+        with:
+          filters: |
+            src:
+              - 'src/**'
+              - 'tsconfig.json'
+              - 'eslint.config.mjs'
+              - 'jest.config.js'
+              - 'knip.json'
+              - '.prettierrc'
+              - 'package.json'
+              - 'package-lock.json'
+            docs:
+              - '*.md'
+              - 'scripts/lint-readme.mjs'
+            deps:
+              - 'package.json'
+              - 'package-lock.json'
+
+  lint-code:
+    name: lint / ${{ matrix.linter }}
+    needs: changes
+    if: needs.changes.outputs.src == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        linter:
+          - eslint
+          - prettier
+          - types
+          - knip
+    steps:
+      - uses: actions/checkout@v6.0.2
+      - uses: actions/setup-node@v6.4.0
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      - name: Configure npm to use GitHub Package Registry
+        run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
+      - run: npm ci
+      - run: npm run lint:${{ matrix.linter }}
+
+  lint-docs:
+    name: lint / ${{ matrix.linter }}
+    needs: changes
+    if: needs.changes.outputs.docs == 'true'
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        linter:
+          - md
+          - readme
+    steps:
+      - uses: actions/checkout@v6.0.2
+      - uses: actions/setup-node@v6.4.0
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      - name: Configure npm to use GitHub Package Registry
+        run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
+      - run: npm ci
+      - run: npm run lint:${{ matrix.linter }}
+
+  test:
+    name: Test
+    needs: [changes, lint-code]
+    if: needs.changes.outputs.src == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6.0.2
+      - uses: actions/setup-node@v6.4.0
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      - name: Configure npm to use GitHub Package Registry
+        run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
+      - run: npm ci
+      - run: npm test
+      - name: Check package types (attw)
+        run: npm run lint:attw
+
+  package-quality:
+    name: Package quality
+    needs: changes
+    if: needs.changes.outputs.deps == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6.0.2
+      - uses: actions/setup-node@v6.4.0
+        with:
+          node-version-file: '.nvmrc'
+          cache: 'npm'
+      - name: Configure npm to use GitHub Package Registry
+        run: echo "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" > ~/.npmrc
+      - run: npm ci
+      - run: npm run build
+      - run: npm run lint:publint
+      - name: Audit dependencies
+        run: npm run lint:audit

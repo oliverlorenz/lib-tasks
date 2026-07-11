@@ -1,0 +1,91 @@
+{
+  "name": "@oliverlorenz/<REPO_NAME>",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist/",
+    "README.md",
+    "CHANGELOG.md"
+  ],
+  "scripts": {
+    "build": "npm run clean && tsc",
+    "check:all": "npm run git-hook:pre-push && npm run git-hook:pre-commit",
+    "clean": "del-cli ./dist",
+    "git-hook:pre-commit": "npm test",
+    "git-hook:pre-push": "npm run lint:eslint && npm run lint:prettier && npm test",
+    "lint:eslint": "eslint \"src/**/*.ts\"",
+    "lint:prettier": "prettier \"src/**/*.ts\" --cache --check",
+    "lint:types": "tsc --noEmit --skipLibCheck && tsc-strict",
+    "lint:knip": "knip",
+    "lint:md": "markdownlint-cli2 \"*.md\" \"!CHANGELOG.md\"",
+    "lint:links": "markdown-link-check README.md --config .markdown-link-check.json",
+    "lint:readme": "node scripts/lint-readme.mjs",
+    "lint:publint": "publint",
+    "lint:attw": "attw --pack .",
+    "lint:audit": "audit-ci --config audit-ci.jsonc",
+    "lint": "npm run lint:eslint && npm run lint:prettier && npm run lint:types && npm run lint:knip && npm run lint:md && npm run lint:readme && npm run lint:publint",
+    "postinstall": "npx husky init",
+    "prepare": "husky",
+    "test": "npm run build && npm run test:coverage",
+    "test:watch": "jest --coverage --coverage-reporters html --watch-all",
+    "test:coverage": "jest --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/oliverlorenz/<REPO_NAME>.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/oliverlorenz/<REPO_NAME>/issues"
+  },
+  "homepage": "https://github.com/oliverlorenz/<REPO_NAME>#readme",
+  "description": "",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "devDependencies": {
+    "@arethetypeswrong/cli": "^0.18.3",
+    "@eslint/eslintrc": "^3.3.5",
+    "@eslint/js": "^10.0.1",
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^26.1.0",
+    "@typescript-eslint/eslint-plugin": "^8.59.4",
+    "@typescript-eslint/parser": "^8.59.4",
+    "audit-ci": "^7.1.0",
+    "conventional-changelog-conventionalcommits": "^10.2.1",
+    "del-cli": "^7.0.0",
+    "eslint": "^10.4.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-check-file": "^3.3.1",
+    "eslint-plugin-no-only-tests": "^3.3.0",
+    "globals": "^17.6.0",
+    "husky": "^9.1.7",
+    "jest": "^30.4.2",
+    "jest-mock-extended": "^4.0.0",
+    "knip": "^6.25.0",
+    "markdown-link-check": "^3.12.0",
+    "markdownlint-cli2": "^0.23.0",
+    "prettier": "^3.8.3",
+    "publint": "^0.3.0",
+    "semantic-release": "^25.0.3",
+    "ts-jest": "^29.4.11",
+    "type-fest": "^5.8.0",
+    "typescript": "^6.0.3",
+    "typescript-strict-plugin": "^2.4.4"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  },
+  "dependencies": {}
+}

@@ -1,0 +1,4 @@
+{
+  // Fail on high severity and above
+  "high": true
+}
