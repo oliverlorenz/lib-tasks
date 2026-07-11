@@ -176,4 +176,109 @@ describe('TaskService', () => {
       await expect(service.listSubtasks(mockTask.id)).resolves.toEqual([child]);
     });
   });
+
+  describe('startTaskOrFail', () => {
+    test('throws naming the blocking predecessor when a finish_to_start dependency is not done', async () => {
+      const predecessor = {
+        ...mockTask,
+        id: 'waschen',
+        title: 'Wäsche waschen',
+        status: 'todo' as const,
+      };
+      const successor = {
+        ...mockTask,
+        id: 'aufhaengen',
+        dependencies: [{ taskId: 'waschen', type: 'finish_to_start' as const }],
+      };
+      mockTaskStorage.findById.mockImplementation((taskId) =>
+        Promise.resolve(taskId === 'waschen' ? predecessor : successor),
+      );
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      await expect(service.startTaskOrFail('aufhaengen')).rejects.toThrow(/Wäsche waschen/);
+    });
+
+    test('succeeds once the finish_to_start predecessor is done', async () => {
+      const predecessor = { ...mockTask, id: 'waschen', status: 'done' as const };
+      const successor = {
+        ...mockTask,
+        id: 'aufhaengen',
+        dependencies: [{ taskId: 'waschen', type: 'finish_to_start' as const }],
+      };
+      mockTaskStorage.findById.mockImplementation((taskId) =>
+        Promise.resolve(taskId === 'waschen' ? predecessor : successor),
+      );
+      mockTaskStorage.update.mockResolvedValue({ ...successor, status: 'in_progress' });
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      const started = await service.startTaskOrFail('aufhaengen');
+
+      expect(started.status).toBe('in_progress');
+      expect(mockTaskStorage.update).toHaveBeenCalledWith(
+        'aufhaengen',
+        expect.objectContaining({ status: 'in_progress' }),
+      );
+    });
+
+    test('ignores non finish_to_start dependencies', async () => {
+      const predecessor = { ...mockTask, id: 'other', status: 'todo' as const };
+      const successor = {
+        ...mockTask,
+        id: 'task-a',
+        dependencies: [{ taskId: 'other', type: 'start_to_start' as const }],
+      };
+      mockTaskStorage.findById.mockImplementation((taskId) =>
+        Promise.resolve(taskId === 'other' ? predecessor : successor),
+      );
+      mockTaskStorage.update.mockResolvedValue({ ...successor, status: 'in_progress' });
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      await expect(service.startTaskOrFail('task-a')).resolves.toMatchObject({
+        status: 'in_progress',
+      });
+    });
+  });
+
+  describe('completeTaskOrFail', () => {
+    test('throws naming the blocking predecessor when a finish_to_start dependency is not done', async () => {
+      const predecessor = {
+        ...mockTask,
+        id: 'waschen',
+        title: 'Wäsche waschen',
+        status: 'todo' as const,
+      };
+      const successor = {
+        ...mockTask,
+        id: 'aufhaengen',
+        dependencies: [{ taskId: 'waschen', type: 'finish_to_start' as const }],
+      };
+      mockTaskStorage.findById.mockImplementation((taskId) =>
+        Promise.resolve(taskId === 'waschen' ? predecessor : successor),
+      );
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      await expect(service.completeTaskOrFail('aufhaengen')).rejects.toThrow(/Wäsche waschen/);
+    });
+
+    test('sets status done and completedAt once the predecessor is done', async () => {
+      const predecessor = { ...mockTask, id: 'waschen', status: 'done' as const };
+      const successor = {
+        ...mockTask,
+        id: 'aufhaengen',
+        dependencies: [{ taskId: 'waschen', type: 'finish_to_start' as const }],
+      };
+      mockTaskStorage.findById.mockImplementation((taskId) =>
+        Promise.resolve(taskId === 'waschen' ? predecessor : successor),
+      );
+      mockTaskStorage.update.mockResolvedValue({ ...successor, status: 'done' });
+      const service = TaskService.createInstance(mockTaskStorage);
+
+      await service.completeTaskOrFail('aufhaengen');
+
+      expect(mockTaskStorage.update).toHaveBeenCalledWith(
+        'aufhaengen',
+        expect.objectContaining({ status: 'done', completedAt: expect.any(Date) }),
+      );
+    });
+  });
 });

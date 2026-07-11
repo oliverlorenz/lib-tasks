@@ -66,4 +66,29 @@ export class TaskService {
   public async listSubtasks(parentId: TaskId): Promise<Task[]> {
     return this.listTasks({ parentId });
   }
+
+  public async startTaskOrFail(id: TaskId): Promise<Task> {
+    await this.assertPredecessorsDone(id);
+    return this.updateTaskOrFail(id, { status: 'in_progress' });
+  }
+
+  public async completeTaskOrFail(id: TaskId): Promise<Task> {
+    await this.assertPredecessorsDone(id);
+    return this.updateTaskOrFail(id, { status: 'done', completedAt: new Date() });
+  }
+
+  private async assertPredecessorsDone(id: TaskId): Promise<void> {
+    const task = await this.getTaskByIdOrFail(id);
+    for (const dependency of task.dependencies) {
+      if (dependency.type !== 'finish_to_start') {
+        continue;
+      }
+      const predecessor = await this.getTaskByIdOrFail(dependency.taskId);
+      if (predecessor.status !== 'done') {
+        throw new Error(
+          `Cannot start task "${task.title}" (${task.id}): predecessor "${predecessor.title}" (${predecessor.id}) is not done yet`,
+        );
+      }
+    }
+  }
 }
