@@ -59,7 +59,7 @@
     "node": ">=22.0.0"
   },
   "devDependencies": {
-    "@arethetypeswrong/cli": "^0.18.3",
+    "@arethetypeswrong/cli": "^0.18.5",
     "@eslint/eslintrc": "^3.3.6",
     "@eslint/js": "^10.0.1",
     "@semantic-release/changelog": "^6.0.3",
@@ -79,10 +79,10 @@
     "husky": "^9.1.7",
     "jest": "^30.4.2",
     "jest-mock-extended": "^4.0.0",
-    "knip": "^6.25.0",
+    "knip": "^6.26.0",
     "markdown-link-check": "^3.12.0",
     "markdownlint-cli2": "^0.23.0",
-    "prettier": "^3.8.3",
+    "prettier": "^3.9.5",
     "publint": "^0.3.0",
     "semantic-release": "^25.0.7",
     "ts-jest": "^29.4.11",
