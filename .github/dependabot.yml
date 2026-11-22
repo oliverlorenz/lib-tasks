@@ -7,6 +7,13 @@ updates:
       day: monday
     commit-message:
       prefix: "chore"
+    ignore:
+      # TypeScript 7 (native Go port) no longer ships the classic compiler API that
+      # @typescript-eslint, typescript-strict-plugin and @arethetypeswrong/cli rely on,
+      # and @typescript-eslint still requires typescript <6.1.0. Remove once
+      # @typescript-eslint/eslint-plugin allows TypeScript 7 in its peerDependencies. See #103.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
     groups:
       eslint:
         patterns:
